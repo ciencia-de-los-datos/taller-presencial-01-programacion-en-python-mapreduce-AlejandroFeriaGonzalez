@@ -13,19 +13,18 @@
 #     ('text2.txt'. 'hypotheses.')
 #   ]
 #
-import glob
-import fileinput
-
-def load_input(input_directory):
-    sequence = []
-    filenames = glob.glob(input_directory + "/*")
-    with fileinput.input(files=filenames) as f:
-        for line in f:
-            sequence.append((fileinput.filename(), line))
-    
-    return sequence
+import os
+from pathlib import Path
 
 
+def load_input(input_directory) -> list[tuple[str, str]]:
+    ruta_input = Path(input_directory)
+    lista = []
+    for d in ruta_input.iterdir():
+        with open(d, "r") as archivo:
+            for linea in archivo:
+                lista.append((d.name, linea))
+    return lista
 
 #
 # Escriba una función llamada maper que recibe una lista de tuplas de la
@@ -39,14 +38,17 @@ def load_input(input_directory):
 #     ...
 #   ]
 #
-def mapper(sequence):
-    new_sequence = []
-    for _, text in sequence:
-        for word in text.split():
-            new_sequence.append((word, 1))
-    return new_sequence
 
+lista = load_input("input")
 
+def mapper(sequence: list[tuple[str, str]]) -> list[tuple[str, int]]:
+    conteo_palabras = {}
+    for tuple in sequence:
+        for palabra in tuple[1].split():
+            conteo_palabras[palabra] = conteo_palabras.get(palabra, 0) + 1
+    return list(conteo_palabras.items())
+
+cuenta_palabras = mapper(lista)
 
 #
 # Escriba la función shuffle_and_sort que recibe la lista de tuplas entregada
@@ -59,14 +61,12 @@ def mapper(sequence):
 #     ...
 #   ]
 #
-def shuffle_and_sort(sequence):
-    sorted_sequence = sorted(sequence, key=lambda x: x[0])
-    return sorted_sequence
+def shuffle_and_sort(sequence: list[tuple[str, int]]) -> list[tuple[str, int]]:
+    return sorted(sequence, key=lambda x: x[0])
 
-sequence = load_input("input")
-sequence = mapper(sequence)
-sequence = shuffle_and_sort(sequence)
-print(sequence)
+print(shuffle_and_sort(cuenta_palabras))
+
+
 #
 # Escriba la función reducer, la cual recibe el resultado de shuffle_and_sort y
 # reduce los valores asociados a cada clave sumandolos. Como resultado, por
